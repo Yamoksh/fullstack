@@ -1,0 +1,419 @@
+<html>
+
+<head>
+    <title>Tic-Tac-Toe Game</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+    <style>
+        .myborder {
+            border: black 0.5px solid;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .boxborder {
+            border: black 0.5px solid;
+        }
+
+        .buttonX {
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            align-items: stretch;
+            background-position-x: 10px;
+            background-position-y: 0px;
+            background-color: red;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-image: url("https://images.vexels.com/media/users/3/155299/isolated/lists/1988d1faba4d059eb4461d955af5cf61-x-mark-scribble.png")
+        }
+
+        .buttonO {
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            align-items: stretch;
+            background-position-x: 10px;
+            background-position-y: 0px;
+            background-color: green;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-image: url("https://icon-library.net/images/o-icon/o-icon-12.jpg");
+        }
+
+        .button {
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            align-items: stretch;
+            background-position-x: 10px;
+            background-position-y: 0px;
+            background-color: bisque;
+        }
+
+        .button:hover {
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            align-items: stretch;
+            background-position-x: 10px;
+            background-position-y: 0px;
+            background-color: aquamarine;
+        }
+
+        .cell {
+            background-color: white;
+            display: flex;
+            height: 90px;
+            max-width: 100%;
+        }
+
+        .blink {
+            animation: blinker 800ms linear infinite;
+        }
+
+        .blinkText {
+            animation: blinkerText 800ms linear infinite;
+        }
+
+        @keyframes blinkerText {
+            0% {
+                color: red;
+            }
+
+            50% {
+                color: black;
+            }
+        }
+
+        @keyframes blinker {
+            0% {
+                background-color: red;
+            }
+
+            25% {
+                background-color: yellow;
+            }
+
+            50% {
+                background-color: blue;
+            }
+
+            100% {
+                background-color: green;
+            }
+        }
+
+        .table td {
+            text-align: center;
+        }
+
+        .table th {
+            text-align: center;
+        }
+    </style>
+
+    <script>
+        window.onload = checkStorageAndRefresh;
+
+        function restartGame() {
+            loadButtonIntialValues();
+            loadIcons();
+            loadScore();
+        }
+
+        function checkStorageAndRefresh() {
+            if (typeof (Storage) !== "undefined") {
+                if (checkStorageBs()) {
+                    loadIcons();
+                    loadScore();
+                    turn = localStorage.getItem("turn");
+                    res = checkWinner();
+                    if (res != null) {
+                        winnerActions(res, turn);
+                    }
+                    else {
+                        if (localStorage.getItem("count") == 9) {
+                            document.getElementById("turn").innerText = "Match has been draw";
+                        }
+                    }
+                }
+                else {
+                    loadButtonIntialValues();
+                }
+            }
+            else {
+                alert("Your browser doesn't support this game");
+            }
+        }
+
+        function loadButtonIntialValues() {
+            for (i = 1; i <= 9; ++i) {
+                key = 'b' + i;
+                value = 0;
+                localStorage.setItem(key, value);
+            }
+            localStorage.setItem('count', 0);
+            let OWins = Number(localStorage.getItem('OWins'));
+            let XWins = Number(localStorage.getItem('XWins'));
+            if (OWins == null) {
+                OWins = 0;
+                localStorage.setItem('OWins', OWins);
+            }
+            if (XWins == null) {
+                XWins = 0;
+                localStorage.setItem('XWins', XWins);
+            }
+            if (XWins < OWins) {
+                localStorage.setItem('turn', 'X');
+            }
+            else {
+                localStorage.setItem('turn', 'O');
+            }
+        }
+        function loadIcons() {
+            for (i = 1; i <= 9; ++i) {
+                let status = localStorage.getItem('b' + i);
+                let buttonClass = "button";
+                if (status == 1) {
+                    buttonClass = "buttonO";
+                    document.getElementById("b" + i).setAttribute('disabled', true);
+                }
+                else if (status == 2) {
+                    buttonClass = "buttonX";
+                    document.getElementById("b" + i).setAttribute('disabled', true);
+                }
+                else {
+                    buttonClass = "button";
+                    document.getElementById("b" + i).removeAttribute('disabled');
+                }
+                document.getElementById("b" + i).className = buttonClass;
+                refreshTurn();
+            }
+        }
+
+        function checkStorageBs() {
+            for (i = 1; i <= 9; ++i) {
+                if (localStorage.getItem('b' + i) == null) {
+                    return false;
+                }
+            }
+            if (localStorage.getItem('turn') == null || localStorage.getItem('count') == null)
+                return false;
+
+            if (localStorage.getItem('OWins') == null || localStorage.getItem('XWins') == null) {
+                return false;
+            }
+            return true;
+        }
+
+        function clickButton(button) {
+            var buttonClassName = button.getAttribute('class');
+            var id = button.getAttribute('id');
+            let turn = localStorage.getItem('turn');
+            let count = localStorage.getItem('count');
+            count++;
+            if (turn == 'O') {
+                button.setAttribute('class', "buttonO");
+                localStorage.setItem('turn', 'X');
+                button.setAttribute('disabled', true);
+                localStorage.setItem(id, 1);
+            }
+            else if (turn == 'X') {
+                button.setAttribute('class', "buttonX");
+                localStorage.setItem('turn', 'O');
+                button.setAttribute('disabled', true);
+                localStorage.setItem(id, 2);
+            }
+            res = checkWinner();
+            if (res != null) {
+                winnerActions(res, turn);
+            }
+            else {
+                //check for draw
+                if (count == 9) {
+                    document.getElementById("turn").innerText = "Match has been draw";
+                }
+                else
+                    refreshTurn();
+            }
+            localStorage.setItem('count', count);
+        }
+
+        function winnerActions(res, turn) {
+            for (i = 0; i < 3; i++) {
+                let ele = document.getElementById("b" + res[i]);
+                ele.classList.add("blink");
+            }
+            disableAllButtons();
+            if (turn == 'X') {
+                XScore = Number(localStorage.getItem('XWins'));
+                localStorage.setItem('XWins', XScore + 1);
+            }
+            else {
+                OScore = Number(localStorage.getItem('OWins'));
+                localStorage.setItem('OWins', OScore + 1);
+            }
+            document.getElementById("turn").innerText = "Player " + turn + " has won";
+            document.getElementById("turn").classList.add("blinkText");
+            loadScore();
+        }
+        function loadScore() {
+            XScore = Number(localStorage.getItem('XWins'));
+            document.getElementById("XScore").innerText = XScore;
+            OScore = Number(localStorage.getItem('OWins'));
+            document.getElementById("OScore").innerText = OScore;
+        }
+        function resetScore() {
+            localStorage.setItem("XWins", 0);
+            localStorage.setItem("OWins", 0);
+            loadScore();
+        }
+        function refreshTurn() {
+            document.getElementById("turn").innerText = "Player " + localStorage.getItem('turn') + "'s turn";
+        }
+
+        function disableAllButtons() {
+            for (i = 1; i < 9; i++) {
+                document.getElementById("b" + i).setAttribute("disabled", true);
+            }
+        }
+        function checkWinner() {
+            var myMap = new Map();
+            for (i = 1; i <= 9; i++) {
+                myMap.set(i, localStorage.getItem("b" + i));
+            }
+            i = 1;
+            res = null;
+            for (j = 1; j <= 3; j++) {
+                if ((myMap.get(i) == 1 || myMap.get(i) == 2) && myMap.get(i) == myMap.get(i + 1) && myMap.get(i + 1) == myMap.get(i + 2)) {
+                    res = [i, i + 1, i + 2];
+                }
+                if ((myMap.get(j) == 1 || myMap.get(j) == 2) && myMap.get(j) == myMap.get(j + 3) && myMap.get(j + 3) == myMap.get(j + 6)) {
+                    res = [j, j + 3, j + 6];
+                }
+                i += 3;
+            }
+            if ((myMap.get(1) == 1 || myMap.get(1) == 2) && myMap.get(1) == myMap.get(5) && myMap.get(5) == myMap.get(9)) {
+                res = [1, 5, 9];
+            }
+            if ((myMap.get(3) == 1 || myMap.get(3) == 2) && myMap.get(3) == myMap.get(5) && myMap.get(5) == myMap.get(7)) {
+                res = [3, 5, 7];
+            }
+            return res;
+        }
+    </script>
+</head>
+
+<body>
+    <hr>
+    <div class="row">
+        <div class="col-xs-10 col-xs-offset-1 col-md-4 col-md-offset-4">
+            <h1 align="center" style="text-emphasis-color: yellow">Tic-Tac-Toe</h1>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="container ">
+        <div class="row ">
+
+            <div class="col-md-3 col-xs-12 text-center">
+                <h1> <span id="turn"></span></h1>
+            </div>
+
+            <div class="col-md-4 col-xs-10 col-xs-offset-1 ">
+                <div class="row boxborder">
+                    <div class="col-xs-12 col-md-12 col-lg-12">
+                        <div class="row">
+                            <div class="col-xs-4 myborder">
+                                <div class="mini-box cell">
+                                    <button class="button" id="b1" onclick="clickButton(this)"></button>
+                                </div>
+                            </div>
+                            <div class="col-xs-4 myborder">
+                                <div class="mini-box cell">
+                                    <button class="button" id="b2" onclick="clickButton(this)"></button>
+                                </div>
+                            </div>
+                            <div class="col-xs-4 myborder">
+                                <div class="mini-box cell">
+                                    <button class="button" onclick="clickButton(this)" id="b3"></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-4 myborder">
+                                <div class="mini-box cell">
+                                    <button class="button" id="b4" onclick="clickButton(this)"></button>
+                                </div>
+                            </div>
+                            <div class="col-xs-4 myborder">
+                                <div class="mini-box cell">
+                                    <button class="button" id="b5" onclick="clickButton(this)"></button>
+                                </div>
+                            </div>
+                            <div class="col-xs-4 myborder">
+                                <div class="mini-box cell">
+                                    <button class="button" id="b6" onclick="clickButton(this)"></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row ">
+                            <div class="col-xs-4 myborder">
+                                <div class="mini-box cell">
+                                    <button class="button" id="b7" onclick="clickButton(this)"></button>
+                                </div>
+                            </div>
+                            <div class="col-xs-4 myborder">
+                                <div class="mini-box cell">
+                                    <button class="button" id="b8" onclick="clickButton(this)"></button>
+                                </div>
+                            </div>
+                            <div class="col-xs-4 myborder">
+                                <div class="mini-box cell">
+                                    <button class="button" id="b9" onclick="clickButton(this)"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <button class=" button" style="border: black 1px solid" onclick="restartGame()"> Restart </button>
+                <h></h>
+            </div>
+            <div class="col-md-3 col-xs-12">
+                <h1>Score Board</h1>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>X</td>
+                            <td id="XScore">0</td>
+                        </tr>
+                        <tr>
+                            <td>O</td>
+                            <td id="OScore">0</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button class="button" onclick="resetScore()">Reset Score</button>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+</body>
+
+</html>
