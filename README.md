@@ -6,7 +6,7 @@
 ### BOOTSRAP
 ### Browser localStorage
 
-## Try it :- Just by hitthing this link in your browser 
+## Try it :- Just by hitting this link in your browser 
 #### https://yamoksh.github.io/tic-tac-toe/
 
 
