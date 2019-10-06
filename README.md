@@ -1,5 +1,8 @@
 # JS Based Tic-Tac-Toe Game
-## Single html page
 
+
+### Single html page
+### CSS Animation
+### BOOTSRAP
 # Dependecies
-### Internet connection for bootstrap and images
+### 1. Internet connection for bootstrap and images
